@@ -1,0 +1,110 @@
+<Window x:Class="VoxMeet.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:VoxMeet.Converters"
+        Title="VoxMeet"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="True"
+        ResizeMode="CanResizeWithGrip"
+        WindowState="Normal"
+        Width="800" Height="280"
+        MinWidth="400" MinHeight="150"
+        WindowStartupLocation="Manual">
+
+    <Window.Resources>
+        <converters:BoolToTextConverter x:Key="BoolToTextConverter" />
+    </Window.Resources>
+
+    <Grid>
+        <Border x:Name="MainBorder"
+                Background="#CC1E1E2E"
+                CornerRadius="12"
+                Margin="6"
+                Padding="16"
+                BorderBrush="#44CDD6F4"
+                BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" BlurRadius="15" Opacity="0.5" ShadowDepth="2" />
+            </Border.Effect>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Top toolbar -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,10">
+                    <StackPanel Orientation="Horizontal"
+                                DockPanel.Dock="Left"
+                                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
+                                Background="Transparent"
+                                Cursor="Hand">
+                        <TextBlock Text="&#x1F3A4;" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBlock Text="VoxMeet"
+                                   Foreground="#AACDD6F4"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal"
+                                DockPanel.Dock="Right"
+                                HorizontalAlignment="Right">
+                        <Button x:Name="BtnStartStop"
+                                Content="{Binding IsRunning, Converter={StaticResource BoolToTextConverter}}"
+                                Click="BtnStartStop_Click"
+                                Width="72" Height="28"
+                                Margin="0,0,8,0"
+                                Background="#CC4CAF50"
+                                Foreground="White"
+                                BorderThickness="0"
+                                FontWeight="Bold"
+                                FontSize="12"
+                                Cursor="Hand" />
+                        <Button x:Name="BtnSettings"
+                                Content="&#x2699;"
+                                Click="BtnSettings_Click"
+                                Width="28" Height="28"
+                                Margin="0,0,8,0"
+                                Background="#CC585B70"
+                                Foreground="White"
+                                BorderThickness="0"
+                                FontSize="16"
+                                Cursor="Hand" />
+                        <Button x:Name="BtnClose"
+                                Content="&#x2715;"
+                                Click="BtnClose_Click"
+                                Width="28" Height="28"
+                                Background="#CCEF5350"
+                                Foreground="White"
+                                BorderThickness="0"
+                                FontSize="13"
+                                Cursor="Hand" />
+                    </StackPanel>
+                </DockPanel>
+
+                <!-- Unified log + transcription area -->
+                <RichTextBox x:Name="OutputBox"
+                             Grid.Row="1"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             IsReadOnly="True"
+                             Foreground="White"
+                             FontSize="12"
+                             VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Disabled"
+                             IsHitTestVisible="False">
+                    <RichTextBox.Document>
+                        <FlowDocument x:Name="OutputDocument"
+                                      PagePadding="0"
+                                      LineHeight="2" />
+                    </RichTextBox.Document>
+                </RichTextBox>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
