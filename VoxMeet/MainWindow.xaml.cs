@@ -15,9 +15,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private readonly AudioService _audioService;
     private readonly TranscriptionService _transcriptionService;
     private readonly ChatGPTService _chatGPTService;
+    private readonly SimulationService _simulationService;
     private readonly StringBuilder _questionBuffer = new();
     private AppSettings _settings;
     private bool _isRunning;
+    private bool _isSimulation;
 
     public bool IsRunning
     {
@@ -48,6 +50,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _audioService = new AudioService();
         _transcriptionService = new TranscriptionService();
         _chatGPTService = new ChatGPTService();
+        _simulationService = new SimulationService();
 
         _audioService.AudioChunkReady += OnAudioChunkReady;
         _transcriptionService.StatusChanged += OnStatusChanged;
@@ -174,6 +177,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _settings = AppSettings.Load();
         ApplyAppearance();
 
+        if (_settings.SimulationMode)
+        {
+            _isSimulation = true;
+            IsRunning = true;
+            _simulationService.Start(AppendLog, AppendTranscription, AppendAnswer);
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(_settings.OpenAiApiKey))
         {
             MessageBox.Show("Please configure your OpenAI API key in Settings.",
@@ -181,6 +192,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         }
 
+        _isSimulation = false;
         _transcriptionService.Configure(_settings.OpenAiApiKey);
         _chatGPTService.Configure(_settings.OpenAiApiKey);
         _audioService.BufferSeconds = _settings.BufferSeconds;
@@ -193,7 +205,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void StopTranscription()
     {
-        _audioService.Stop();
+        if (_isSimulation)
+            _simulationService.Stop();
+        else
+            _audioService.Stop();
+
+        _isSimulation = false;
         IsRunning = false;
         _questionBuffer.Clear();
         AppendLog("Recording stopped.");

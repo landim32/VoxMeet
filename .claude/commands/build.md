@@ -1,0 +1,1 @@
+Run `dotnet build VoxMeet.sln` and report the result. Summarize any errors or warnings.

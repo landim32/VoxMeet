@@ -1,0 +1,1 @@
+Run `dotnet run --project VoxMeet/VoxMeet.csproj` and report the result.

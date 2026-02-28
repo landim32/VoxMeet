@@ -32,6 +32,9 @@ public class AppSettings
         Always answer in the same language as the question.
         """;
 
+    // Simulation
+    public bool SimulationMode { get; set; } = false;
+
     // Log
     public bool ShowLog { get; set; } = true;
     public int LogFontSize { get; set; } = 11;

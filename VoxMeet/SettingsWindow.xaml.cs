@@ -66,6 +66,9 @@ public partial class SettingsWindow : Window
         TxtLogFontValue.Text = _settings.LogFontSize.ToString();
         TxtLogColor.Text = _settings.LogFontColor;
 
+        // Simulation
+        ChkSimulationMode.IsChecked = _settings.SimulationMode;
+
         // Prompt
         TxtSystemPrompt.Text = _settings.SystemPrompt;
     }
@@ -190,6 +193,9 @@ public partial class SettingsWindow : Window
         _settings.ShowLog = ChkShowLog.IsChecked == true;
         _settings.LogFontSize = (int)SliderLogFont.Value;
         _settings.LogFontColor = TxtLogColor.Text;
+
+        // Simulation
+        _settings.SimulationMode = ChkSimulationMode.IsChecked == true;
 
         // Prompt
         _settings.SystemPrompt = TxtSystemPrompt.Text;
