@@ -77,7 +77,8 @@
                                 Background="Transparent"
                                 Cursor="Hand">
                         <TextBlock Text="&#x1F3A4;" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0" />
-                        <TextBlock Text="VoxMeet"
+                        <TextBlock x:Name="TitleText"
+                                   Text="VoxMeet"
                                    Foreground="#AACDD6F4"
                                    FontSize="13"
                                    FontWeight="SemiBold"

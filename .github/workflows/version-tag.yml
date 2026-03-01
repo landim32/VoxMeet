@@ -44,6 +44,29 @@ jobs:
         echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
         echo "NuGetVersionV2: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
     
+    - name: Update version in project files
+      run: |
+        VERSION="${{ steps.gitversion.outputs.majorMinorPatch }}"
+        FULL_VERSION="${VERSION}.0"
+        echo "Updating project version to ${VERSION}"
+        sed -i "s|<Version>.*</Version>|<Version>${VERSION}</Version>|" VoxMeet/VoxMeet.csproj
+        sed -i "s|<AssemblyVersion>.*</AssemblyVersion>|<AssemblyVersion>${FULL_VERSION}</AssemblyVersion>|" VoxMeet/VoxMeet.csproj
+        sed -i "s|<FileVersion>.*</FileVersion>|<FileVersion>${FULL_VERSION}</FileVersion>|" VoxMeet/VoxMeet.csproj
+        echo "Updated VoxMeet.csproj:"
+        grep -E "<(Version|AssemblyVersion|FileVersion)>" VoxMeet/VoxMeet.csproj
+
+    - name: Commit version update
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        if git diff --quiet; then
+          echo "No version changes to commit"
+        else
+          git add VoxMeet/VoxMeet.csproj
+          git commit -m "chore: bump version to ${{ steps.gitversion.outputs.majorMinorPatch }} [skip ci]"
+          git push origin main
+        fi
+
     - name: Check if tag exists
       id: check_tag
       run: |

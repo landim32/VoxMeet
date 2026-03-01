@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
@@ -43,6 +44,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         InitializeComponent();
         DataContext = this;
+
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        TitleText.Text = $"VoxMeet v{version?.Major}.{version?.Minor}.{version?.Build}";
 
         _settings = AppSettings.Load();
         ApplyAppearance();
