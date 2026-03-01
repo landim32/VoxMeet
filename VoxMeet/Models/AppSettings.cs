@@ -10,6 +10,7 @@ public class AppSettings
     public string AudioMode { get; set; } = "loopback";
     public string? SelectedDeviceId { get; set; }
     public int BufferSeconds { get; set; } = 5;
+    public string WhisperModel { get; set; } = "whisper-1";
 
     // Appearance
     public int BackgroundOpacity { get; set; } = 80;
@@ -32,7 +33,8 @@ public class AppSettings
         Always answer in the same language as the question.
         """;
 
-    // Simulation
+    // Behavior
+    public bool SilenceDetection { get; set; } = true;
     public bool SimulationMode { get; set; } = false;
 
     // Log

@@ -119,11 +119,24 @@
                             <ComboBoxItem Content="10" Tag="10" />
                         </ComboBox>
 
-                        <!-- Simulation Mode -->
+                        <!-- Whisper Model -->
+                        <TextBlock Text="Whisper Model" FontWeight="SemiBold" Foreground="White" Margin="0,16,0,6" />
+                        <ComboBox x:Name="CmbWhisperModel" Height="32" Padding="6,4">
+                            <ComboBoxItem Content="whisper-1" Tag="whisper-1" IsSelected="True" />
+                            <ComboBoxItem Content="gpt-4o-transcribe" Tag="gpt-4o-transcribe" />
+                            <ComboBoxItem Content="gpt-4o-mini-transcribe" Tag="gpt-4o-mini-transcribe" />
+                        </ComboBox>
+
+                        <!-- Silence Detection -->
                         <Separator Background="#FF45475A" Margin="0,16,0,0" />
+                        <CheckBox x:Name="ChkSilenceDetection"
+                                  Content="Send to AI on silence (when no '?' detected)"
+                                  Foreground="White" Margin="0,16,0,0" />
+
+                        <!-- Simulation Mode -->
                         <CheckBox x:Name="ChkSimulationMode"
                                   Content="Simulation Mode (no API/audio required)"
-                                  Foreground="White" Margin="0,16,0,0" />
+                                  Foreground="White" Margin="0,10,0,0" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>

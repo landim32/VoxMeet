@@ -46,6 +46,15 @@ public partial class SettingsWindow : Window
             }
         }
 
+        foreach (ComboBoxItem item in CmbWhisperModel.Items)
+        {
+            if ((string)item.Tag == _settings.WhisperModel)
+            {
+                CmbWhisperModel.SelectedItem = item;
+                break;
+            }
+        }
+
         PopulateDevices();
 
         // Appearance
@@ -66,7 +75,8 @@ public partial class SettingsWindow : Window
         TxtLogFontValue.Text = _settings.LogFontSize.ToString();
         TxtLogColor.Text = _settings.LogFontColor;
 
-        // Simulation
+        // Behavior
+        ChkSilenceDetection.IsChecked = _settings.SilenceDetection;
         ChkSimulationMode.IsChecked = _settings.SimulationMode;
 
         // Prompt
@@ -180,6 +190,9 @@ public partial class SettingsWindow : Window
         if (int.TryParse(bufferItem?.Tag as string, out int secs))
             _settings.BufferSeconds = secs;
 
+        var whisperItem = CmbWhisperModel.SelectedItem as ComboBoxItem;
+        _settings.WhisperModel = whisperItem?.Tag as string ?? "whisper-1";
+
         // Appearance
         _settings.BackgroundColor = TxtBgColor.Text;
         _settings.BackgroundOpacity = (int)SliderOpacity.Value;
@@ -194,7 +207,8 @@ public partial class SettingsWindow : Window
         _settings.LogFontSize = (int)SliderLogFont.Value;
         _settings.LogFontColor = TxtLogColor.Text;
 
-        // Simulation
+        // Behavior
+        _settings.SilenceDetection = ChkSilenceDetection.IsChecked == true;
         _settings.SimulationMode = ChkSimulationMode.IsChecked == true;
 
         // Prompt

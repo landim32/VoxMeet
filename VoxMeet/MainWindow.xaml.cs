@@ -55,6 +55,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _audioService.AudioChunkReady += OnAudioChunkReady;
         _transcriptionService.StatusChanged += OnStatusChanged;
         _transcriptionService.TranscriptionReceived += OnTranscriptionReceived;
+        _transcriptionService.SilenceDetected += OnSilenceDetected;
         _transcriptionService.ErrorOccurred += OnTranscriptionError;
 
         _chatGPTService.AnswerReceived += OnAnswerReceived;
@@ -193,7 +194,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
 
         _isSimulation = false;
-        _transcriptionService.Configure(_settings.OpenAiApiKey);
+        _transcriptionService.Configure(_settings.OpenAiApiKey, _settings.WhisperModel);
         _chatGPTService.Configure(_settings.OpenAiApiKey);
         _audioService.BufferSeconds = _settings.BufferSeconds;
         _questionBuffer.Clear();
@@ -257,6 +258,23 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 await _chatGPTService.AskAsync(question);
             });
         }
+    }
+
+    private void OnSilenceDetected()
+    {
+        if (!_settings.SilenceDetection) return;
+        if (_questionBuffer.Length == 0) return;
+
+        var question = _questionBuffer.ToString().Trim();
+        _questionBuffer.Clear();
+
+        AppendLog($"Silence detected. Sending buffered text as question: \"{question}\"");
+        AppendLog("Sending question to ChatGPT...");
+
+        _ = Task.Run(async () =>
+        {
+            await _chatGPTService.AskAsync(question);
+        });
     }
 
     private static bool ContainsQuestion(string text)
