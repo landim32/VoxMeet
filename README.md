@@ -4,12 +4,13 @@
 ![WPF](https://img.shields.io/badge/WPF-Desktop-blueviolet)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![OpenAI](https://img.shields.io/badge/OpenAI-Whisper%20%2B%20GPT--4o--mini-orange)
+![Version](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fraw.githubusercontent.com%2Flandim32%2FVoxMeet%2Fmain%2FVoxMeet%2FVoxMeet.csproj&query=%2F%2FVersion&label=Version&color=brightgreen)
 
 ## Overview
 
 **VoxMeet** is a WPF desktop application that acts as a real-time AI interview assistant. It captures system audio or microphone input, transcribes speech using OpenAI Whisper, detects questions, and sends them to ChatGPT for instant answers — all displayed in a transparent, always-on-top overlay. Built with **.NET 8**, **NAudio**, and the **OpenAI SDK**.
 
-Designed for technical interviews and meetings, VoxMeet runs as a sleek, semi-transparent overlay that stays on top of all windows, providing real-time transcription and AI-powered answers without disrupting your workflow.
+Designed for technical interviews and meetings, VoxMeet runs as a sleek, semi-transparent overlay that stays on top of all windows, providing real-time transcription and AI-powered answers without disrupting your workflow. The application title bar displays the current version (e.g., **VoxMeet v0.2.3**), which is automatically managed by the CI/CD pipeline.
 
 ---
 
@@ -22,7 +23,10 @@ Designed for technical interviews and meetings, VoxMeet runs as a sleek, semi-tr
 - 🎨 **Customizable Appearance** - Configurable colors, font sizes, and background opacity
 - ⚙️ **Configurable System Prompt** - Editable system prompt to tailor AI responses to your scenario
 - 🔊 **Multi-Channel Audio Support** - Handles mono, stereo, and surround sound audio sources
+- 🔇 **Silence Detection** - Automatically sends buffered text as a question when silence is detected
+- 🧪 **Simulation Mode** - Test the full pipeline without an API key or audio device
 - 💾 **Persistent Settings** - All preferences saved locally to `%AppData%/VoxMeet/settings.json`
+- 🏷️ **Automatic Versioning** - Version displayed in the title bar, managed via GitVersion and CI/CD
 
 ---
 
@@ -38,8 +42,8 @@ Designed for technical interviews and meetings, VoxMeet runs as a sleek, semi-tr
 - **OpenAI SDK 2.8.0** - Whisper transcription (`whisper-1`) and Chat completion (`gpt-4o-mini`)
 
 ### DevOps
-- **GitHub Actions** - Automated semantic versioning and release creation
-- **GitVersion** - Semantic version calculation from commit message prefixes
+- **GitHub Actions** - Automated semantic versioning, version stamping, and release creation
+- **GitVersion 5.x** - Semantic version calculation from commit message prefixes
 
 ---
 
@@ -50,7 +54,7 @@ VoxMeet/
 ├── .github/
 │   └── workflows/
 │       ├── create-release.yml       # Automated GitHub release creation
-│       └── version-tag.yml          # Semantic version tagging via GitVersion
+│       └── version-tag.yml          # Semantic version tagging + project file update
 ├── VoxMeet/
 │   ├── Converters/
 │   │   └── BoolToTextConverter.cs   # Bool-to-Start/Stop text converter
@@ -59,6 +63,7 @@ VoxMeet/
 │   ├── Services/
 │   │   ├── AudioService.cs          # WASAPI capture, resampling, buffering
 │   │   ├── ChatGPTService.cs        # GPT-4o-mini chat completion
+│   │   ├── SimulationService.cs     # Simulated pipeline for testing without API
 │   │   └── TranscriptionService.cs  # Whisper speech-to-text
 │   ├── App.xaml                     # Global styles, no StartupUri
 │   ├── App.xaml.cs                  # Manual MainWindow startup
@@ -66,7 +71,7 @@ VoxMeet/
 │   ├── MainWindow.xaml.cs           # Event subscriptions, UI updates
 │   ├── SettingsWindow.xaml          # Three-tab settings dialog
 │   ├── SettingsWindow.xaml.cs       # Settings load/save logic
-│   └── VoxMeet.csproj              # Project configuration
+│   └── VoxMeet.csproj              # Project configuration (includes version)
 ├── .gitignore
 ├── GitVersion.yml                   # Semantic versioning rules
 ├── LICENSE                          # MIT License
@@ -80,7 +85,7 @@ VoxMeet/
 
 - **Windows 10/11** (WPF is Windows-only)
 - **.NET 8 SDK** - [Download](https://dotnet.microsoft.com/download/dotnet/8.0)
-- **OpenAI API Key** - [Get one here](https://platform.openai.com/api-keys)
+- **OpenAI API Key** - [Get one here](https://platform.openai.com/api-keys) (optional if using Simulation Mode)
 
 ---
 
@@ -113,6 +118,8 @@ dotnet run --project VoxMeet/VoxMeet.csproj
 4. Adjust the **buffer duration** (3, 5, 8, or 10 seconds)
 5. Click **Save**
 
+> **Tip:** Enable **Simulation Mode** in Settings to test the full pipeline without an API key or audio device.
+
 ---
 
 ## 🏗️ Architecture
@@ -128,6 +135,10 @@ AudioService (NAudio WASAPI) → AudioChunkReady event
 ```
 
 All three services emit events; `MainWindow` subscribes and marshals UI updates to the dispatcher thread. Audio is resampled to 16kHz/16-bit/mono PCM, buffered for N seconds, then wrapped as WAV in-memory before sending to Whisper.
+
+### Version Display
+
+The application reads its version from the assembly metadata at startup and displays it in the title bar (e.g., **VoxMeet v0.2.3**). The version is set in `VoxMeet.csproj` via the `<Version>`, `<AssemblyVersion>`, and `<FileVersion>` properties, which are automatically updated by the CI/CD pipeline on each push to `main`.
 
 ---
 
@@ -149,6 +160,14 @@ VoxMeet offers extensive appearance customization through the **Settings > Appea
 
 The **system prompt** can be customized in the **Settings > Prompt** tab to tailor AI responses for different scenarios.
 
+### Behavior Settings
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Silence Detection | `true` | Automatically sends buffered text when silence is detected |
+| Simulation Mode | `false` | Runs a simulated pipeline without API calls or audio capture |
+| Whisper Model | `whisper-1` | OpenAI Whisper model used for transcription |
+
 ---
 
 ## 🔄 CI/CD
@@ -156,13 +175,25 @@ The **system prompt** can be customized in the **Settings > Prompt** tab to tail
 ### GitHub Actions
 
 **Workflow 1: Version and Tag** (`version-tag.yml`)
-- Triggers on push to `main`
+- Triggers on push to `main` or manual dispatch
 - Uses GitVersion to calculate semantic version from commit prefixes
-- Creates and pushes a git tag (e.g., `v1.2.3`)
+- Updates `<Version>`, `<AssemblyVersion>`, and `<FileVersion>` in `VoxMeet.csproj`
+- Commits the version update with `[skip ci]` to avoid recursive triggers
+- Creates and pushes a git tag (e.g., `v0.2.3`)
+
+```
+Push to main → GitVersion calculates version
+  → Updates Version/AssemblyVersion/FileVersion in .csproj
+  → Commits + pushes with [skip ci]
+  → Creates git tag (e.g., v0.2.3)
+  → App title bar displays "VoxMeet v0.2.3"
+```
 
 **Workflow 2: Create Release** (`create-release.yml`)
 - Triggers after successful version tagging
+- Creates a release branch (e.g., `releases/v0.2.0`)
 - Creates a GitHub Release with auto-generated release notes for major/minor bumps
+- Patch-only changes skip release creation
 
 ### Commit Message Conventions
 
@@ -212,6 +243,11 @@ The **system prompt** can be customized in the **Settings > Prompt** tab to tail
 - Restart the application (it positions at bottom-center of the screen by default)
 - Adjust opacity in Settings > Appearance
 
+#### Testing without API key or audio device
+
+**Solution:**
+- Enable **Simulation Mode** in Settings > General to run the full pipeline with simulated questions and answers
+
 ---
 
 ## 🤝 Contributing
@@ -253,6 +289,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - Built with [.NET 8](https://dotnet.microsoft.com/) and [WPF](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 - Audio processing powered by [NAudio](https://github.com/naudio/NAudio)
 - AI capabilities provided by [OpenAI](https://openai.com/) (Whisper + GPT-4o-mini)
+- Semantic versioning powered by [GitVersion](https://gitversion.net/)
 
 ---
 

@@ -9,7 +9,8 @@
       "WebSearch",
       "Bash(dotnet add:*)",
       "Bash(dotnet build:*)",
-      "Bash(dotnet run:*)"
+      "Bash(dotnet run:*)",
+      "Skill(readme-generator)"
     ]
   }
 }
